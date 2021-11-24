@@ -1,7 +1,95 @@
 <template>
-  <Tutorial/>
+  <div class="content">
+    <validation-observer ref="obs" v-slot="ObserverProps">
+      <label class="content-label">新規登録</label>
+      <br />
+      <validation-provider v-slot="{ errors }" rules="required|max:20">
+        <input
+          v-model="name"
+          class="content-input"
+          type="text"
+          name="name"
+          value=""
+          placeholder="ユーザーネーム"
+        />
+        <div class="error">{{ errors[0] }}</div>
+      </validation-provider>
+      <validation-provider v-slot="{ errors }" rules="required|email">
+        <input
+          v-model="email"
+          class="content-input"
+          type="email"
+          name="email"
+          value=""
+          placeholder="メールアドレス"
+        />
+        <div class="error">{{ errors[0] }}</div>
+      </validation-provider>
+      <validation-provider v-slot="{ errors }" rules="required|min:6">
+        <input
+          v-model="password"
+          class="content-input"
+          type="password"
+          name="password"
+          value=""
+          placeholder="パスワード"
+        />
+        <div class="error">{{ errors[0] }}</div>
+      </validation-provider>
+      <button
+        class="button"
+        type="button"
+        @click="register"
+        :disabled="ObserverProps.invalid || !ObserverProps.validated"
+      >
+        新規登録
+      </button>
+    </validation-observer>
+  </div>
 </template>
 
 <script>
-export default {}
+import firebase from "~/plugins/firebase";
+export default {
+  layout:'default',
+  data() {
+    return {
+      name: null,
+      email: null,
+      password: null,
+    };
+  },
+  methods: {
+    register() {
+      if (!this.email || !this.password) {
+        alert("メールアドレスまたはパスワードが入力されていません。");
+        return;
+      }
+      firebase
+        .auth()
+        .createUserWithEmailAndPassword(this.email, this.password)
+        .then((data) => {
+          data.user.sendEmailVerification().then(() => {
+            this.$router.replace("/login");
+          });
+        })
+        .catch((error) => {
+          switch (error.code) {
+            case "auth/invalid-email":
+              alert("メールアドレスの形式が違います。");
+              break;
+            case "auth/invalid-email":
+              alert("このメールアドレスは既に使われています。");
+              break;
+            case "auth/invalid-email":
+              alert("パスワードは6文字以上で入力して下さい。");
+              break;
+            default:
+              alert("エラーが起きました。しばらくしてから再度お試しください。");
+              break;
+          }
+        });
+    },
+  },
+};
 </script>
