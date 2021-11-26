@@ -20,10 +20,10 @@
         <div class="share-content">
           <p class="share-title">シェア</p>
           <validation-provider v-slot="{ errors }" rules="required|max:120">
-            <textarea v-model="newShare" class="share-textarea" name="シェア"></textarea>
+            <textarea v-model="newShare" class="share-textarea" id="share" name="シェア"></textarea>
             <div class="error">{{ errors[0] }}</div>
           </validation-provider>
-          <button class="home-button">シェアする</button>
+          <button @click="insertShare" class="home-button">シェアする</button>
         </div>
       </validation-observer>
     </div>
@@ -36,6 +36,7 @@
 <script>
 import firebase from "~/plugins/firebase";
 export default {
+  layout:"home",
   data() {
     return {
       newShare: "",
@@ -53,32 +54,32 @@ export default {
         });
     },
     async getShare() {
-      const resData = await this.$axios.get("http://127.0.0.1:8000/api/share/");
+      const resData = await this.$axios.get("http://127.0.0.1:8000/api/v1/share/");
       this.shareLists = resData.data.data;
     },
     async insertShare() {
       const sendData = {
         share: this.newShare,
       };
-      await this.$axios.post("http://127.0.0.1:8000/api/share/", sendData);
+      await this.$axios.post("http://127.0.0.1:8000/api/v1/share/", sendData);
       this.getShare();
     },
     async updateShare(id, share) {
       const sendData = {
         share: share,
       };
-      await this.$axios.put("http://127.0.0.1:8000/api/share/" + id, sendData);
+      await this.$axios.put("http://127.0.0.1:8000/api/v1/share/" + id, sendData);
       this.getShare();
     },
     async deleteShare(id) {
-      await this.$axios.delete("http://127.0.0.1:8000/api/share/" + id);
+      await this.$axios.delete("http://127.0.0.1:8000/api/v1/share/" + id);
       this.getShare();
     },
   },
-  created() {
+  created(){
     this.getShare();
-  },
-};
+  }
+}
 </script>
 
 <style>
@@ -94,6 +95,7 @@ export default {
 }
 .home-main-content {
   display: block;
+  width:100%;
 }
 .img-logo {
   padding: 10px;
@@ -154,5 +156,11 @@ export default {
   color: #fff;
   text-decoration: none;
   cursor: pointer;
+}
+.img-heart,
+.img-cross,
+.img-detail{
+  width:20px;
+  height:20px;
 }
 </style>
