@@ -63,17 +63,7 @@ export default {
       };
       await this.$axios.post("http://127.0.0.1:8000/api/v1/share/", sendData);
       this.getShare();
-    },
-    async updateShare(id, share) {
-      const sendData = {
-        share: share,
-      };
-      await this.$axios.put("http://127.0.0.1:8000/api/v1/share/" + id, sendData);
-      this.getShare();
-    },
-    async deleteShare(id) {
-      await this.$axios.delete("http://127.0.0.1:8000/api/v1/share/" + id);
-      this.getShare();
+      location.reload()
     },
   },
   created(){

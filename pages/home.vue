@@ -15,10 +15,10 @@
               aaa
             </div>
             <div class="item-container">
-              <img class="img-cross" src="/images/cross.png"/>
+              <img @click="deleteShare(item.id)" class="img-cross" src="/images/cross.png"/>
             </div>
             <div class="item-container">
-              <img class="img-detail" src="/images/detail.png"/>
+              <img @click="toComment" class="img-detail" src="/images/detail.png"/>
             </div>
           </div>
           <div class="home-content__share">
@@ -49,6 +49,9 @@ export default {
           alert("ログアウトが完了しました");
           this.$router.replace("/");
         });
+    },
+    toComment(){
+      this.$router.push('/comment');
     },
     async getShare() {
       const resData = await this.$axios.get("http://127.0.0.1:8000/api/v1/share/");
