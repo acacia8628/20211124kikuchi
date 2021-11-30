@@ -39,7 +39,7 @@
       <button
         class="button"
         type="button"
-        @click="register"
+        @click="register; insertUser"
         :disabled="ObserverProps.invalid || !ObserverProps.validated"
       >
         新規登録
@@ -90,6 +90,13 @@ export default {
           }
         });
     },
+    async insertUser(){
+      const sendData = {
+        name:this.name,
+        email:this.email,
+      };
+      await this.$axios.post("http://127.0.0.1:8000/api/v1/user", sendData);
+    }
   },
 };
 </script>

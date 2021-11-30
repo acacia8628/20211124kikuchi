@@ -58,10 +58,11 @@ export default {
       this.shareLists = resData.data.data;
     },
     async insertShare() {
+      const userEmail = firebase.auth().currentUser.email;
       const sendData = {
         share: this.newShare,
       };
-      await this.$axios.post("http://127.0.0.1:8000/api/v1/share/", sendData);
+      await this.$axios.post("http://127.0.0.1:8000/api/v1/share/", sendData, userEmail);
       this.getShare();
       location.reload()
     },
