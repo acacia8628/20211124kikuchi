@@ -39,7 +39,7 @@
       <button
         class="button"
         type="button"
-        @click="register; insertUser"
+        @click="register"
         :disabled="ObserverProps.invalid || !ObserverProps.validated"
       >
         新規登録
@@ -57,6 +57,7 @@ export default {
       name: null,
       email: null,
       password: null,
+      uid:null,
     };
   },
   methods: {
@@ -70,6 +71,7 @@ export default {
         .createUserWithEmailAndPassword(this.email, this.password)
         .then((data) => {
           data.user.sendEmailVerification().then(() => {
+            this.insertUser();
             this.$router.replace("/login");
           });
         })
@@ -91,9 +93,13 @@ export default {
         });
     },
     async insertUser(){
+      await firebase.auth().onAuthStateChanged((user) => {
+        if(user){
+          const uid = user.uid
+        }
+      });
       const sendData = {
         name:this.name,
-        email:this.email,
       };
       await this.$axios.post("http://127.0.0.1:8000/api/v1/user", sendData);
     }

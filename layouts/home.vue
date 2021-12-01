@@ -58,7 +58,7 @@ export default {
       this.shareLists = resData.data.data;
     },
     async insertShare() {
-      const userEmail = firebase.auth().currentUser.email;
+      const userEmail = firebase.auth().currentUser;
       const sendData = {
         share: this.newShare,
       };
