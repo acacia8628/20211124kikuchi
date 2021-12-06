@@ -92,17 +92,19 @@ export default {
           }
         });
     },
-    async insertUser(){
-      await firebase.auth().onAuthStateChanged((user) => {
+    insertUser(){
+      firebase.auth().onAuthStateChanged((user) => {
         if(user){
           const uid = user.uid
+          const sendData = {
+            name:this.name,
+            uid: uid
+          };
+          console.log(sendData);
+          this.$axios.post("http://127.0.0.1:8000/api/v1/user", sendData);
         }
       });
-      const sendData = {
-        name:this.name,
-      };
-      await this.$axios.post("http://127.0.0.1:8000/api/v1/user", sendData);
-    }
+    },
   },
 };
 </script>

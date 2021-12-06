@@ -20,7 +20,7 @@
         <div class="share-content">
           <p class="share-title">シェア</p>
           <validation-provider v-slot="{ errors }" rules="required|max:120">
-            <textarea v-model="newShare" class="share-textarea" id="share" name="シェア"></textarea>
+            <textarea v-model="newShare" class="share-textarea" id="newShare" name="シェア"></textarea>
             <div class="error">{{ errors[0] }}</div>
           </validation-provider>
           <button @click="insertShare" class="home-button">シェアする</button>
@@ -57,14 +57,20 @@ export default {
       const resData = await this.$axios.get("http://127.0.0.1:8000/api/v1/share/");
       this.shareLists = resData.data.data;
     },
-    async insertShare() {
-      const userEmail = firebase.auth().currentUser;
-      const sendData = {
-        share: this.newShare,
-      };
-      await this.$axios.post("http://127.0.0.1:8000/api/v1/share/", sendData, userEmail);
+    insertShare() {
+      firebase.auth().onAuthStateChanged((user) => {
+        if(user){
+          const uid = user.uid
+          const sendData = {
+            share:this.newShare,
+            uid:uid,
+          };
+          console.log(sendData);
+          //this.$axios.post("http://127.0.0.1:8000/api/v1/share/", sendData);
+        }
+      })
       this.getShare();
-      location.reload()
+      //location.reload()
     },
   },
   created(){
