@@ -97,8 +97,8 @@ export default {
             uid:uid,
           };
           console.log(sendData);
-          //this.$axios.delete("http://127.0.0.1:8000/api/v1/like/" ,{params:sendData});
-          this.$axios.delete("http://127.0.0.1:8000/api/v1/like/" +{params:sendData});
+          this.$axios.delete("http://127.0.0.1:8000/api/v1/like/"+id ,{params:sendData});
+          //this.$axios.delete("http://127.0.0.1:8000/api/v1/like/" +{params:sendData});
           //this.$axios.delete("http://127.0.0.1:8000/api/v1/like/" ,{data:sendData});
           //this.$axios.delete("http://127.0.0.1:8000/api/v1/like/" +{data:sendData});
           this.status = false;

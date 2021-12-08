@@ -70,7 +70,7 @@ export default {
         }
       })
       this.getShare();
-      location.reload()
+      //location.reload()
     },
   },
 }
