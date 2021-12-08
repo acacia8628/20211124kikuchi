@@ -66,16 +66,13 @@ export default {
             uid:uid,
           };
           console.log(sendData);
-          //this.$axios.post("http://127.0.0.1:8000/api/v1/share/", sendData);
+          this.$axios.post("http://127.0.0.1:8000/api/v1/share/", sendData);
         }
       })
       this.getShare();
-      //location.reload()
+      location.reload()
     },
   },
-  created(){
-    this.getShare();
-  }
 }
 </script>
 

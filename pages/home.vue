@@ -7,9 +7,12 @@
       <tr v-for="item in shareLists" :key="item.id" class="home-table__content">
         <td>
           <div class="home-content__item">
-            <div>username</div>
+            <div>{{ item.user.name }}</div>
             <div class="item-container">
-              <img class="img-heart" src="/images/heart.png"/>
+              <img @click="insertLike(item.id)" class="img-heart" src="/images/heart.png"/>
+            </div>
+            <div class="item-container">
+              <img @click="deleteLike(item.id)" class="img-heart" src="/images/heart.png"/>
             </div>
             <div class="item-container">
               aaa
@@ -37,6 +40,7 @@ export default {
   data() {
     return {
       newShare: "",
+      status:false,
       shareLists: [],
     };
   },
@@ -64,16 +68,44 @@ export default {
       await this.$axios.post("http://127.0.0.1:8000/api/v1/share/", sendData);
       this.getShare();
     },
-    async updateShare(id, share) {
-      const sendData = {
-        share: share,
-      };
-      await this.$axios.put("http://127.0.0.1:8000/api/v1/share/" + id, sendData);
-      this.getShare();
-    },
     async deleteShare(id) {
       await this.$axios.delete("http://127.0.0.1:8000/api/v1/share/" + id);
       this.getShare();
+    },
+    insertLike(id){
+      firebase.auth().onAuthStateChanged((user) => {
+        if(user){
+          const uid = user.uid
+          const sendData = {
+            uid:uid,
+            id:id,
+          };
+          console.log(sendData);
+          this.$axios.post("http://127.0.0.1:8000/api/v1/like/", sendData);
+          this.status = true;
+        } else {
+          alert("ログインして下さい。");
+        }
+      })
+    },
+    deleteLike(id){
+      firebase.auth().onAuthStateChanged((user) => {
+        if(user){
+          const uid = user.uid
+          const sendData = {
+            id:id,
+            uid:uid,
+          };
+          console.log(sendData);
+          //this.$axios.delete("http://127.0.0.1:8000/api/v1/like/" ,{params:sendData});
+          this.$axios.delete("http://127.0.0.1:8000/api/v1/like/" +{params:sendData});
+          //this.$axios.delete("http://127.0.0.1:8000/api/v1/like/" ,{data:sendData});
+          //this.$axios.delete("http://127.0.0.1:8000/api/v1/like/" +{data:sendData});
+          this.status = false;
+        } else {
+          alert("ログインして下さい。");
+        }
+      })
     },
   },
   created() {
