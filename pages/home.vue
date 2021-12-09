@@ -8,14 +8,14 @@
         <td>
           <div class="home-content__item">
             <div>{{ item.user.name }}</div>
-            <div class="item-container">
+            <div v-if="status == false" class="item-container">
               <img @click="insertLike(item.id)" class="img-heart" src="/images/heart.png"/>
             </div>
-            <div class="item-container">
+            <div v-else="status == true" class="item-container">
               <img @click="deleteLike(item.id)" class="img-heart" src="/images/heart.png"/>
             </div>
             <div class="item-container">
-              aaa
+               aaa
             </div>
             <div class="item-container">
               <img @click="deleteShare(item.id)" class="img-cross" src="/images/cross.png"/>
@@ -72,6 +72,22 @@ export default {
       await this.$axios.delete("http://127.0.0.1:8000/api/v1/share/" + id);
       this.getShare();
     },
+    likeCheck(){
+      firebase.auth().onAuthStateChanged((user) => {
+        if(user){
+          const uid = user.uid
+          const sendData = {
+            uid:uid,
+            id:id,
+          };
+          console.log(sendData);
+          this.$axios.post("http://127.0.0.1:8000/api/v1/like/", sendData);
+          this.status = true;
+        } else {
+          alert("ログインして下さい。");
+        }
+      })
+    },
     insertLike(id){
       firebase.auth().onAuthStateChanged((user) => {
         if(user){
@@ -98,9 +114,6 @@ export default {
           };
           console.log(sendData);
           this.$axios.delete("http://127.0.0.1:8000/api/v1/like/"+id ,{params:sendData});
-          //this.$axios.delete("http://127.0.0.1:8000/api/v1/like/" +{params:sendData});
-          //this.$axios.delete("http://127.0.0.1:8000/api/v1/like/" ,{data:sendData});
-          //this.$axios.delete("http://127.0.0.1:8000/api/v1/like/" +{data:sendData});
           this.status = false;
         } else {
           alert("ログインして下さい。");
