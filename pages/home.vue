@@ -8,14 +8,14 @@
         <td>
           <div class="home-content__item">
             <div>{{ item.user.name }}</div>
-            <div v-if="status == false" class="item-container">
-              <img @click="insertLike(item.id)" class="img-heart" src="/images/heart.png"/>
+            <div v-if="isLiked(item.id) === false" class="item-container">
+              <img @click="insertLike(item.id)" class="img-heart__non" src="/images/heart.png"/>
             </div>
-            <div v-else="status == true" class="item-container">
+            <div v-else class="item-container">
               <img @click="deleteLike(item.id)" class="img-heart" src="/images/heart.png"/>
             </div>
             <div class="item-container">
-               aaa
+              aaa
             </div>
             <div class="item-container">
               <img @click="deleteShare(item.id)" class="img-cross" src="/images/cross.png"/>
@@ -40,8 +40,10 @@ export default {
   data() {
     return {
       newShare: "",
+      uid:"",
       status:false,
       shareLists: [],
+      likedArray: [],
     };
   },
   methods: {
@@ -57,6 +59,7 @@ export default {
     toComment(){
       this.$router.push('/comment');
     },
+    //Share関係
     async getShare() {
       const resData = await this.$axios.get("http://127.0.0.1:8000/api/v1/share/");
       this.shareLists = resData.data.data;
@@ -72,57 +75,58 @@ export default {
       await this.$axios.delete("http://127.0.0.1:8000/api/v1/share/" + id);
       this.getShare();
     },
-    likeCheck(){
-      firebase.auth().onAuthStateChanged((user) => {
-        if(user){
-          const uid = user.uid
-          const sendData = {
-            uid:uid,
-            id:id,
-          };
-          console.log(sendData);
-          this.$axios.post("http://127.0.0.1:8000/api/v1/like/", sendData);
-          this.status = true;
-        } else {
-          alert("ログインして下さい。");
-        }
-      })
+    //Like関係
+    async getLikes(){
+      const resData = await this.$axios.get("http://127.0.0.1:8000/api/v1/like/");
+      this.likedArray = resData.data.data;
+    },
+    isLiked(id){
+      console.log(this.likedArray);
+      const likedCheck = (element) => element.user.uid === this.uid
+        && element.id === id;
+      console.log(likedCheck);
+      if(this.likedArray.some(likedCheck) === true){
+        return true
+      } else{
+        return false
+      }
     },
     insertLike(id){
-      firebase.auth().onAuthStateChanged((user) => {
-        if(user){
-          const uid = user.uid
-          const sendData = {
-            uid:uid,
-            id:id,
-          };
-          console.log(sendData);
-          this.$axios.post("http://127.0.0.1:8000/api/v1/like/", sendData);
-          this.status = true;
-        } else {
-          alert("ログインして下さい。");
-        }
-      })
+      try {
+        const sendData = {
+        uid:this.uid,
+        id:id,
+      };
+      console.log(sendData);
+      this.$axios.post("http://127.0.0.1:8000/api/v1/like/",sendData);
+      } catch {
+        alert("ログインして下さい。");
+      }
     },
     deleteLike(id){
+      try {
+        const sendData = {
+          uid:this.uid,
+          id:id
+        };
+        console.log(sendData);
+        this.$axios.delete("http://127.0.0.1:8000/api/v1/like/"+id ,{params:sendData});
+      } catch {
+        alert("ログインして下さい。")
+      }
+    },
+    getUid(){
       firebase.auth().onAuthStateChanged((user) => {
         if(user){
-          const uid = user.uid
-          const sendData = {
-            id:id,
-            uid:uid,
-          };
-          console.log(sendData);
-          this.$axios.delete("http://127.0.0.1:8000/api/v1/like/"+id ,{params:sendData});
-          this.status = false;
-        } else {
-          alert("ログインして下さい。");
+          this.uid = user.uid
         }
       })
     },
   },
   created() {
     this.getShare();
+    this.getLikes();
+    this.getUid();
   },
 };
 </script>
@@ -159,5 +163,10 @@ export default {
 .home-content__share{
   margin-top:10px;
   color:#fff;
+}
+.img-heart__non{
+  opacity:0.1;
+  width:20px;
+  height:20px;
 }
 </style>
