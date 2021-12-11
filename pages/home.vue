@@ -11,11 +11,11 @@
             <div v-if="isLiked(item.id) === false" class="item-container">
               <img @click="insertLike(item.id)" class="img-heart__non" src="/images/heart.png"/>
             </div>
-            <div v-else class="item-container">
+            <div v-else="isLiked(item.id) === true" class="item-container">
               <img @click="deleteLike(item.id)" class="img-heart" src="/images/heart.png"/>
             </div>
             <div class="item-container">
-              aaa
+              {{ countLike(item.id) }}
             </div>
             <div class="item-container">
               <img @click="deleteShare(item.id)" class="img-cross" src="/images/cross.png"/>
@@ -41,10 +41,24 @@ export default {
     return {
       newShare: "",
       uid:"",
-      status:false,
       shareLists: [],
       likedArray: [],
     };
+  },
+  computed: {
+    countLike: function(){
+      return function(itemId){
+        var count = 0;
+        var likes = this.likedArray;
+        var length = likes.length;
+        for(var i = 0; i < length; i++){
+          if(likes[i].share_id === itemId){
+            count++;
+          }
+        }
+        return count;
+      }
+    }
   },
   methods: {
     logout() {
@@ -63,13 +77,7 @@ export default {
     async getShare() {
       const resData = await this.$axios.get("http://127.0.0.1:8000/api/v1/share/");
       this.shareLists = resData.data.data;
-    },
-    async insertShare() {
-      const sendData = {
-        share: this.newShare,
-      };
-      await this.$axios.post("http://127.0.0.1:8000/api/v1/share/", sendData);
-      this.getShare();
+      (this.shareLists);
     },
     async deleteShare(id) {
       await this.$axios.delete("http://127.0.0.1:8000/api/v1/share/" + id);
@@ -79,38 +87,39 @@ export default {
     async getLikes(){
       const resData = await this.$axios.get("http://127.0.0.1:8000/api/v1/like/");
       this.likedArray = resData.data.data;
+      console.log(this.likedArray);
     },
     isLiked(id){
-      console.log(this.likedArray);
       const likedCheck = (element) => element.user.uid === this.uid
-        && element.id === id;
-      console.log(likedCheck);
+        && element.share_id === id;
       if(this.likedArray.some(likedCheck) === true){
         return true
       } else{
         return false
       }
     },
-    insertLike(id){
+    async insertLike(id){
       try {
         const sendData = {
-        uid:this.uid,
-        id:id,
+          uid:this.uid,
+          id:id,
       };
       console.log(sendData);
-      this.$axios.post("http://127.0.0.1:8000/api/v1/like/",sendData);
+      await this.$axios.post("http://127.0.0.1:8000/api/v1/like/",sendData);
+      this.getLikes();
       } catch {
         alert("ログインして下さい。");
       }
     },
-    deleteLike(id){
+    async deleteLike(id){
       try {
         const sendData = {
           uid:this.uid,
           id:id
         };
         console.log(sendData);
-        this.$axios.delete("http://127.0.0.1:8000/api/v1/like/"+id ,{params:sendData});
+        await this.$axios.delete("http://127.0.0.1:8000/api/v1/like/"+id ,{params:sendData});
+        this.getLikes();
       } catch {
         alert("ログインして下さい。")
       }
