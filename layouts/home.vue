@@ -57,8 +57,8 @@ export default {
       const resData = await this.$axios.get("http://127.0.0.1:8000/api/v1/share/");
       this.shareLists = resData.data.data;
     },
-    insertShare() {
-      firebase.auth().onAuthStateChanged((user) => {
+    async insertShare() {
+      await firebase.auth().onAuthStateChanged((user) => {
         if(user){
           const uid = user.uid
           const sendData = {
@@ -69,7 +69,7 @@ export default {
           this.$axios.post("http://127.0.0.1:8000/api/v1/share/", sendData);
         }
       })
-      this.getShare();
+      await this.getShare();
       location.reload()
     },
   },

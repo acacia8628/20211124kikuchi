@@ -7,11 +7,11 @@
       <tr class="home-table__content">
         <td>
           <div class="home-content__item">
-            <!-- <div>{{ currentShare.user.name }}</div> -->
+            <!-- <div>{{ item.user.name }}</div> -->
             <div v-if="isLiked(currentShare.id) === false" class="item-container">
               <img @click="insertLike(currentShare.id)" class="img-heart__non" src="/images/heart.png"/>
             </div>
-            <div v-else="isLiked(currentShare.id) === true" class="item-container">
+            <div v-else="(currentShare.id) === true" class="item-container">
               <img @click="deleteLike(currentShare.id)" class="img-heart" src="/images/heart.png"/>
             </div>
             <div class="item-container">
@@ -26,7 +26,31 @@
           </div>
         </td>
       </tr>
+      <tr>
+        <th class="comment-table__ttl">コメント</th>
+      </tr>
+      <tr>
+        <th v-for="item in commentLists" :key="item.id" class="comment-table__content">
+          <td>
+            <div class="comment-content__item">
+              <!-- <div>{{ item.user.name }}</div> -->
+            </div>
+            <div class="comment-content__comment">
+              <!-- <div>{{ item.comment }}</div> -->
+            </div>
+          </td>
+        </th>
+      </tr>
     </table>
+    <validation-observer ref="obs" v-slot="ObserverProps">
+        <div class="comment-content">
+          <validation-provider v-slot="{ errors }" rules="required|max:120">
+            <textarea v-model="newComment" class="comment-textarea" id="newComment" name="Comment"></textarea>
+            <div class="error">{{ errors[0] }}</div>
+          </validation-provider>
+          <!-- <button @click="insertComment" class="comment-button">コメント</button> -->
+        </div>
+      </validation-observer>
   </div>
 </template>
 
@@ -39,8 +63,9 @@ export default {
       newComment: "",
       uid:"",
       shareLists: [],
+      commentLists: [],
       likedArray: [],
-      currentShare: {},
+      currentShare: [],
     };
   },
   computed: {
@@ -144,6 +169,38 @@ export default {
         alert("ログインして下さい。")
       }
     },
+    //Comment関係
+    async getComment() {
+      const resData = await this.$axios.get("http://127.0.0.1:8000/api/v1/comment");
+      this.commentLists = resData.data.data;
+    },
+    async insertComment() {
+      try {
+        const sendData = {
+          comment: this.newComment,
+          uid: this.uid,
+        };
+        console.log(sendData);
+        await this.$axios.post("http://127.0.0.1:8000/api/v1/comment", sendData);
+        this.getComment();
+        location.reload();
+      } catch {
+        alert("ログインして下さい。")
+      }
+      /* firebase.auth().onAuthStateChanged((user) => {
+        if(user){
+          const uid = user.uid
+          const sendData = {
+            share:this.newShare,
+            uid:uid,
+          };
+          console.log(sendData);
+          this.$axios.post("http://127.0.0.1:8000/api/v1/share/", sendData);
+        }
+      })
+      this.getShare();
+      location.reload() */
+    }
   },
   created(){
     this.getCurrentShare();
@@ -152,3 +209,43 @@ export default {
   },
 }
 </script>
+
+<style>
+.comment-table__ttl{
+  padding:10px;
+  color:#fff;
+  font-size:14px;
+}
+.comment-title {
+  color: #fff;
+  margin-bottom: 10px;
+}
+.comment-content {
+  display: block;
+  padding: 20px 10px;
+}
+.comment-textarea {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100px;
+  padding: 5px;
+  border: 1px solid #fff;
+  border-radius: 5px;
+  background-color: inherit;
+  color: #fff;
+  resize: none;
+  outline: none;
+}
+.comment-button {
+  display: block;
+  margin-top: 10px;
+  margin-left: auto;
+  background-color: #571ddc;
+  border: none;
+  border-radius: 1.5em;
+  padding: 0.8em 2em;
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+}
+</style>
