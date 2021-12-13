@@ -7,7 +7,7 @@
       <tr class="home-table__content">
         <td>
           <div class="home-content__item">
-            <!-- <div>{{ item.user.name }}</div> -->
+            <div v-if="currentShare.length != 0">{{ currentShare.user.name }}</div>
             <div v-if="isLiked(currentShare.id) === false" class="item-container">
               <img @click="insertLike(currentShare.id)" class="img-heart__non" src="/images/heart.png"/>
             </div>
@@ -26,29 +26,29 @@
           </div>
         </td>
       </tr>
+
       <tr>
         <th class="comment-table__ttl">コメント</th>
       </tr>
-      <tr>
-        <th v-for="item in commentLists" :key="item.id" class="comment-table__content">
-          <td>
-            <div class="comment-content__item">
-              <!-- <div>{{ item.user.name }}</div> -->
-            </div>
-            <div class="comment-content__comment">
-              <!-- <div>{{ item.comment }}</div> -->
-            </div>
-          </td>
-        </th>
+      <tr v-for="item in checkCurrentComments" :key="item.id" class="comment-table__content">
+        <td>
+          <div class="comment-content__item">
+            <div>{{ item.user.name }}</div>
+          </div>
+          <div class="comment-content__comment">
+            <div>{{ item.comment }}</div>
+          </div>
+        </td>
       </tr>
     </table>
+
     <validation-observer ref="obs" v-slot="ObserverProps">
         <div class="comment-content">
           <validation-provider v-slot="{ errors }" rules="required|max:120">
             <textarea v-model="newComment" class="comment-textarea" id="newComment" name="Comment"></textarea>
             <div class="error">{{ errors[0] }}</div>
           </validation-provider>
-          <!-- <button @click="insertComment" class="comment-button">コメント</button> -->
+          <button @click="insertComment" class="comment-button">コメント</button>
         </div>
       </validation-observer>
   </div>
@@ -62,10 +62,11 @@ export default {
     return {
       newComment: "",
       uid:"",
-      shareLists: [],
-      commentLists: [],
       likedArray: [],
+      shareLists: [],
+      CommentLists: [],
       currentShare: [],
+      currentComments: [],
     };
   },
   computed: {
@@ -80,6 +81,12 @@ export default {
           }
         }
         return count;
+      }
+    },
+    checkCurrentComments: function(){
+      if(this.currentComments != 0){
+        var currentComments = this.currentComments
+        return currentComments;
       }
     }
   },
@@ -171,41 +178,33 @@ export default {
     },
     //Comment関係
     async getComment() {
+      const shareId = this.$route.params.id;
       const resData = await this.$axios.get("http://127.0.0.1:8000/api/v1/comment");
-      this.commentLists = resData.data.data;
+      const commentLists = await resData.data.data;
+      commentLists.forEach((comment) => {
+        if(comment.share_id === Number(shareId)){
+          this.currentComments = comment;
+          console.log(this.currentComments);
+        }
+      });
     },
     async insertComment() {
-      try {
-        const sendData = {
-          comment: this.newComment,
-          uid: this.uid,
-        };
-        console.log(sendData);
-        await this.$axios.post("http://127.0.0.1:8000/api/v1/comment", sendData);
-        this.getComment();
-        location.reload();
-      } catch {
-        alert("ログインして下さい。")
-      }
-      /* firebase.auth().onAuthStateChanged((user) => {
-        if(user){
-          const uid = user.uid
-          const sendData = {
-            share:this.newShare,
-            uid:uid,
-          };
-          console.log(sendData);
-          this.$axios.post("http://127.0.0.1:8000/api/v1/share/", sendData);
-        }
-      })
-      this.getShare();
-      location.reload() */
+      const shareId = await this.currentShare.id;
+      const sendData = {
+        comment: this.newComment,
+        shareId: shareId,
+        uid: this.uid,
+      };
+      await this.$axios.post("http://127.0.0.1:8000/api/v1/comment", sendData);
+      await this.getComment();
+      location.reload();
     }
   },
   created(){
     this.getCurrentShare();
     this.getLikes();
     this.getUid();
+    this.getComment();
   },
 }
 </script>
@@ -215,14 +214,26 @@ export default {
   padding:10px;
   color:#fff;
   font-size:14px;
+  border-bottom: 1px solid #fff;
 }
-.comment-title {
-  color: #fff;
-  margin-bottom: 10px;
+.comment-table__content{
+  display:block;
+  padding:10px;
+  border-bottom:1px solid #fff;
 }
 .comment-content {
   display: block;
   padding: 20px 10px;
+}
+.comment-content__item{
+  display:flex;
+  align-items:center;
+  color:#fff;
+  font-weight:bold;
+}
+.comment-content__comment{
+  margin-top:10px;
+  color:#fff;
 }
 .comment-textarea {
   box-sizing: border-box;

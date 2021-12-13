@@ -183,6 +183,7 @@ export default {
   color:#fff;
 }
 .img-heart__non{
+  cursor: pointer;
   opacity:0.1;
   width:20px;
   height:20px;

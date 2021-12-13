@@ -154,6 +154,7 @@ export default {
 .img-heart,
 .img-cross,
 .img-detail{
+  cursor: pointer;
   width:20px;
   height:20px;
 }
