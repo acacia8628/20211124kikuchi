@@ -34,6 +34,9 @@
         <td>
           <div class="comment-content__item">
             <div>{{ item.user.name }}</div>
+            <div v-show="userCheck(item.id)  === true" class="item-container">
+              <img @click="deleteComment(item.id)" class="img-cross" src="/images/cross.png"/>
+            </div>
           </div>
           <div class="comment-content__comment">
             <div>{{ item.comment }}</div>
@@ -65,7 +68,6 @@ export default {
       paramsId: "",
       likedArray: [],
       shareLists: [],
-      CommentLists: [],
       currentShare: [],
       currentComments: [],
     };
@@ -84,12 +86,6 @@ export default {
         return count;
       }
     },
-    /* checkCurrentComments: function(){
-      if(this.currentComments != 0){
-        var currentComments = this.currentComments
-        return currentComments;
-      }
-    } */
   },
   methods: {
     //User関係
@@ -112,7 +108,7 @@ export default {
     userCheck(id){
       const loginUser = (element) => element.user.uid === this.uid
         && element.id === id;
-      if(this.shareLists.some(loginUser) === true){
+      if(this.currentComments.some(loginUser) === true){
         return true
       } else {
         return false
@@ -180,13 +176,12 @@ export default {
     //Comment関係
     async getComment() {
       const id = await this.paramsId;
-      const resData = await this.$axios.get(
-        "http://127.0.0.1:8000/api/v1/comment/"+id);
-      this.currentComments = resData.data.data;
+      const resData = await this.$axios.get("http://127.0.0.1:8000/api/v1/comment/"+id);
+      this.currentComments = resData.data.data[0].comments;
       console.log(this.currentComments);
     },
     async insertComment() {
-      const shareId = await this.currentShare.id;
+      const shareId = await this.paramsId;
       const sendData = {
         comment: this.newComment,
         shareId: shareId,
@@ -194,8 +189,12 @@ export default {
       };
       await this.$axios.post("http://127.0.0.1:8000/api/v1/comment", sendData);
       await this.getComment();
-      //location.reload();
     },
+    async deleteComment(id) {
+      await this.$axios.delete("http://127.0.0.1:8000/api/v1/comment/" + id);
+      this.getComment();
+    },
+    //その他
     async createParamsId(){
       const id = this.$route.params.id;
       this.paramsId = id;
@@ -203,11 +202,11 @@ export default {
     }
   },
   created(){
+    this.getUid();
+    this.createParamsId();
     this.getCurrentShare();
     this.getLikes();
-    this.getUid();
     this.getComment();
-    this.createParamsId();
   },
 }
 </script>
