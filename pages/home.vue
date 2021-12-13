@@ -137,7 +137,7 @@ export default {
       }
     },
     //その他
-    toComment(id){
+    async toComment(id){
       this.$router.push({path: `/comment/${id}`});
     },
   },
