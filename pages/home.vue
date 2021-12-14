@@ -138,7 +138,7 @@ export default {
     },
     //その他
     async toComment(id){
-      this.$router.push({path: `/comment/${id}`});
+      this.$router.push({path: `/comment` , query: {id:id}});
     },
   },
   created() {

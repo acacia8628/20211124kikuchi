@@ -30,16 +30,16 @@
       <tr>
         <th class="comment-table__ttl">コメント</th>
       </tr>
-      <tr v-for="item in currentComments" :key="item.id" class="comment-table__content">
+      <tr v-for="comment in currentComments" :key="comment.id" class="comment-table__content">
         <td>
           <div class="comment-content__item">
-            <div>{{ item.user.name }}</div>
-            <div v-show="userCheck(item.id)  === true" class="item-container">
-              <img @click="deleteComment(item.id)" class="img-cross" src="/images/cross.png"/>
+            <div>{{ comment.user.name }}</div>
+            <div v-show="userCheck(comment.id)  === true" class="item-container">
+              <img @click="deleteComment(comment.id)" class="img-cross" src="/images/cross.png"/>
             </div>
           </div>
           <div class="comment-content__comment">
-            <div>{{ item.comment }}</div>
+            <div>{{ comment.comment }}</div>
           </div>
         </td>
       </tr>
@@ -70,7 +70,7 @@ export default {
     return {
       newComment: "",
       uid:"",
-      paramsId: "",
+      queryId: "",
       likedArray: [],
       shareLists: [],
       currentShare: [],
@@ -126,7 +126,7 @@ export default {
     },
     async getCurrentShare(){
       await this.getShare();
-      const shareId = this.paramsId;
+      const shareId = this.queryId;
       this.shareLists.forEach((share) => {
         if(share.id === Number(shareId)){
           this.currentShare = share;
@@ -180,14 +180,14 @@ export default {
     },
     //Comment関係
     async getComment() {
-      const id = await this.paramsId;
+      const id = await this.queryId;
       const resData = await this.$axios.get("http://127.0.0.1:8000/api/v1/comment/"+id);
-      this.currentComments = resData.data.data[0].comments;
+      this.currentComments = resData.data.data;
       console.log(this.currentComments);
     },
     async insertComment() {
       if(this.newComment.length != 0 && this.newComment.length <= 120){
-        const shareId = await this.paramsId;
+        const shareId = await this.queryId;
         const sendData = {
           comment: this.newComment,
           shareId: shareId,
@@ -209,15 +209,15 @@ export default {
       this.getComment();
     },
     //その他
-    async createParamsId(){
-      const id = this.$route.params.id;
-      this.paramsId = id;
-      console.log(this.paramsId);
+    async createQueryId(){
+      const id = this.$route.query.id;
+      this.queryId = id;
+      console.log(this.queryId);
     }
   },
   created(){
     this.getUid();
-    this.createParamsId();
+    this.createQueryId();
     this.getCurrentShare();
     this.getLikes();
     this.getComment();
