@@ -80,10 +80,10 @@ export default {
             case "auth/invalid-email":
               alert("メールアドレスの形式が違います。");
               break;
-            case "auth/invalid-email":
+            case "auth/email-already-in-use":
               alert("このメールアドレスは既に使われています。");
               break;
-            case "auth/invalid-email":
+            case "auth/weak-password":
               alert("パスワードは6文字以上で入力して下さい。");
               break;
             default:
