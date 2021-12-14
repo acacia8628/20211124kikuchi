@@ -48,7 +48,12 @@
     <validation-observer ref="obs" v-slot="ObserverProps">
         <div class="comment-content">
           <validation-provider v-slot="{ errors }" rules="required|max:120">
-            <textarea v-model="newComment" class="comment-textarea" id="newComment" name="Comment"></textarea>
+            <textarea
+              v-model="newComment"
+              class="comment-textarea"
+              id="newComment"
+              name="Comment"
+            ></textarea>
             <div class="error">{{ errors[0] }}</div>
           </validation-provider>
           <button @click="insertComment" class="comment-button">コメント</button>
@@ -181,14 +186,23 @@ export default {
       console.log(this.currentComments);
     },
     async insertComment() {
-      const shareId = await this.paramsId;
-      const sendData = {
-        comment: this.newComment,
-        shareId: shareId,
-        uid: this.uid,
-      };
-      await this.$axios.post("http://127.0.0.1:8000/api/v1/comment", sendData);
+      if(this.newComment.length != 0 && this.newComment.length <= 120){
+        const shareId = await this.paramsId;
+        const sendData = {
+          comment: this.newComment,
+          shareId: shareId,
+          uid: this.uid,
+        };
+        await this.$axios.post("http://127.0.0.1:8000/api/v1/comment", sendData);
+      } else if(this.newComment <= 0){
+        alert("コメントを入力して下さい。");
+        location.reload();
+      } else {
+        alert("コメントは120文字以内にして下さい。");
+        location.reload();
+      }
       await this.getComment();
+      location.reload();
     },
     async deleteComment(id) {
       await this.$axios.delete("http://127.0.0.1:8000/api/v1/comment/" + id);

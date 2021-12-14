@@ -59,7 +59,7 @@ export default {
     },
     async insertShare() {
       await firebase.auth().onAuthStateChanged((user) => {
-        if(user){
+        if(user && this.newShare.length <= 120){
           const uid = user.uid
           const sendData = {
             share:this.newShare,
@@ -67,6 +67,8 @@ export default {
           };
           console.log(sendData);
           this.$axios.post("http://127.0.0.1:8000/api/v1/share/", sendData);
+        } else {
+          alert("シェアは120文字以内にして下さい。")
         }
       })
       await this.getShare();
@@ -157,5 +159,8 @@ export default {
   cursor: pointer;
   width:20px;
   height:20px;
+}
+.error{
+  color:#fff;
 }
 </style>
